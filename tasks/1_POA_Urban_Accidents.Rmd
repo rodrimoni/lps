@@ -66,7 +66,7 @@ In this analysis was used the following variables:
   
 - Question answer
 
-The time of the day with most accidents is in period of the day at 15 hours (3:00pm)
+The time of the day with most accidents in 2000 is in period of the day at 15 hours (3:00pm)
 
 First we wanted to see which period of the day with most accidents then we plotted a histogram with the count of accidents by period (day and night). To achieve this we wrote this code below:
 
