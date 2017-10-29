@@ -1,6 +1,6 @@
 ---
 title: "Urban Accidents in the City of Porto Alegre"
-author: "Jean-Marc Vincent, Lucas Mello Schnorr"
+author: "Rodrigo Moni"
 date: "October 2017"
 output:
   pdf_document:
@@ -39,11 +39,99 @@ library(readr);
 library(dplyr);
 library(magrittr);
 URL <- "http://www.opendatapoa.com.br/storage/f/2013-11-06T17%3A26%3A29.293Z/acidentes-2000.csv"
+```
+
+```{r}
 df <- read_delim(URL, delim=";");
 ```
 
 ```{r}
 df
-````
+```
+
+```{r}
+histogram <- df %>% group_by(NOITE_DIA) %>% filter(NOITE_DIA %in% c("DIA", "NOITE"))
+count(histogram)
+```
+
+```{r, fig.width=3, fig.height=5}
+library(ggplot2)
+ggp <- ggplot(histogram,aes(x=NOITE_DIA))
+# counts
+ggp + geom_bar(fill="lightgreen") + ylab("Number of Accidents") + xlab("Period of the day")
+```
 
 
+```{r}
+histogramDia <- df %>% group_by(NOITE_DIA, FX_HORA) %>% filter(NOITE_DIA == c("DIA") & FX_HORA < 19 & FX_HORA > 6)
+(histogramDia)
+```
+
+
+```{r, fig.width=10, fig.height=5}
+sequence <- 6:19
+result <- paste(sequence,"h")
+ggp2 <- ggplot(histogramDia,aes(x=factor(FX_HORA, levels= as.character(seq(6,19,1)), labels = result)))
+               
+# counts
+ggp2 + geom_bar(fill="lightblue") + xlab("Time of the Day") + ylab("Number of accidents") + coord_cartesian(ylim=c(600,1400))
+```
+
+# Task
+
+1. Semantics of the Data
+
+In this analysis was used the following variables:
+  - NOITE_DIA: Variable of type "chr"  that identifies the period of the day when happened the accident. It assumes three values in the dataset: "DIA" means "Day", "NOITE" means "Night" and "NA" means "No Value".
+- FX_HORA: Variable of type "int" that identifies the hour of the day when happend the accident. The value means the hour of the day in brazilian format.
+
+Obs: There are some inconsitencies in the dataset, for example are some records with the NOITE_DIA = Day and FX_HORA = 23 which is clearly wrong, because 23h (11:00pm) is in the period of night.
+
+2. The selected question
+  "What is the time of the day with most accidents?"
+  
+3. Question answer
+
+The time of the day with most accidents is in period of the day at 15 hours (3:00pm)
+
+First we wanted to see which period of the day with most accidents then we plotted a histogram with the count of accidents by period (day and night). To achieve this we wrote this code below:
+
+```{r}
+histogram <- df %>% group_by(NOITE_DIA) %>% filter(NOITE_DIA %in% c("DIA", "NOITE"))
+count(histogram)
+```
+
+We did a "group_by" NOITE_DIA and then we applied a filter to get only the records that had value "DIA" or "NIGHT", excluding the records with the Value "NA".
+
+See the plot below:
+
+```{r, fig.width=3, fig.height=5}
+library(ggplot2)
+ggp <- ggplot(histogram,aes(x=NOITE_DIA))
+# counts
+ggp + geom_bar(fill="lightgreen") + ylab("Number of Accidents") + xlab("Period of the day")
+```
+
+In this image we can see that the period with the most accidents is the period of the Day ("DIA"" in the image). In the period of the day in this year happened more than 13000 accidents.
+
+After that we wanted to know the exactly time of the day with most accidents, so we wrote the following code:
+
+```{r}
+histogramDia <- df %>% group_by(FX_HORA)
+count(histogramDia)
+```
+
+We did a "group_by" FX_HORA (hour) to verify the exactly hour with most accidents. The result is 18h (6pm). We can see better in the histogram plotted below:
+
+```{r, fig.width=15, fig.height=8}
+sequence <- 0:23
+result <- paste(sequence,"h")
+ggp2 <- ggplot(histogramDia,aes(x=factor(FX_HORA, levels= as.character(seq(0,23,1)), labels = result)))
+               
+# counts
+ggp2 + geom_bar(fill="lightblue") + xlab("Time of the Day") + ylab("Number of accidents")
+```
+
+In this image we can clearly see that the hour with most accitents is the 18h and in the second place the 15h. 
+
+To generate the x axis as categorical data it was necessary to read the hours as "char" instead of "int".
