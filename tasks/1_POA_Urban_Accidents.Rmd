@@ -50,7 +50,7 @@ df <- read_delim(URL, delim=";");
 
 - Semantics of the Data
 
-In this analysis was used the following variables:
+In this analysis the following variables were used:
 
 
   1. NOITE_DIA: Variable of type "chr"  that identifies the period of the day when happened the accident. It assumes three values in the dataset: "DIA" means "Day", "NOITE" means "Night" and "NA" means "No Value".
@@ -105,6 +105,4 @@ ggp2 <- ggplot(histogramDia,aes(x=factor(FX_HORA, levels= as.character(seq(0,23,
 ggp2 + geom_bar(fill="lightblue", stat = "identity") + xlab("Time of the Day") + ylab("Number of accidents") + geom_text(aes(label=N), vjust=1.6, color="black", size=5.5)
 ```
 
-In this image we can clearly see that the hour with most accitents is the 18h and in the second place the 15h. 
-
-To generate the x axis as categorical data it was necessary to read the hours as "char" instead of "int".
+In this image we can clearly see that the hour with most accidents is the 18h and in the second place the 15h. 
