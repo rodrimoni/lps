@@ -1,0 +1,20 @@
+# Critical Analysis of a Plot
+
+1. The selected plot
+   - How Britain voted in 2017 general election
+   - How the age was a important factor in the election (1st plot)
+   - Source: https://www.theguardian.com/politics/datablog/ng-interactive/2017/jun/20/young-voters-class-and-turnout-how-britain-voted-in-2017
+
+2. The Critical Analysis
+   - At a first look is not that easy to interpret the meaning of the arrows, but with a closer look 
+     we can see that arrows means the variation of the values from 2015 to 2017. 
+     As an alternative, if we wanted some usual plots, would be  interesting to plot two bars aside, 
+     one for each year (i.e. 2015 and 2017). Another issue about the arrows is that the meaning of its 
+     orientation is not that clear. When the arrow goes up means a growth of the percentage and when 
+     it goes down means a decrease of the percentage, however when the arrows points to right? 
+     I believe this behavior means that the values had not change in between the years.
+   - The meaning of the x and y axis are very clear. The color scheme used to represents the different 
+     political parties are good as well.
+   - In the plot of Liberal Democrats we cannot see a great variation in the values between 2015 and 
+     2017, so it's a little bit harder to realize how much the values have changed.  
+ 
