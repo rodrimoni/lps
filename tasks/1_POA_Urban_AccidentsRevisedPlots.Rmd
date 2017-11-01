@@ -115,7 +115,7 @@ result <- paste(sequence,"h")
 ggp2 <- ggplot(histogramDia,aes(x=factor(FX_HORA, levels= as.character(seq(0,23,1)), labels = result), y=N))
                
 # counts
-ggp2 + geom_bar(fill="darkred", stat = "identity") + xlab("Time of the Day") + ylab("Number of accidents") + geom_text(aes(label=N), vjust=1.5, color="white", size=5.5) + theme_bw(base_size = 22) + scale_y_continuous(breaks=c(seq(0,1400, 250))) +  
+ggp2 + geom_bar(fill="darkred", stat = "identity") + xlab("Time of the Day") + ylab("Number of accidents") + geom_text(aes(label=N), vjust=1.6, color="white", size=5.5) + theme_bw(base_size = 22) + scale_y_continuous(breaks=c(seq(0,1400, 250))) +  
   theme (
         axis.title.x = element_blank()
     )
