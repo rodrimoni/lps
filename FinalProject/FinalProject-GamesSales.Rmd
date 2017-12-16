@@ -21,10 +21,9 @@ We want to understand the trends in video games area, analyzing its sales around
 
 # Questions
 
-1. Are the games with the highest critic score the most sold? 
-2. Are the games sold equally in NA, EU and JP?
-3. Which game genre was most sale by each decade?
-4. Is the number of sales of shooter games increasing or decreasing?
+1. There is linear correlation between critic score and number of global sales? If yes, are the games with the highest critic score the most sold? 
+
+2. Are the games sold equally in NA, EU? 
 
 
 ```{r}
@@ -32,6 +31,8 @@ library(readr);
 library(dplyr);
 library(magrittr);
 library(ggplot2);
+library(nortest);
+library(knitr)
 URL <- "https://github.com/rodrimoni/lps/raw/master/FinalProject/Video_Games_Sales_as_at_22_Dec_2016.csv"
 ```
 
@@ -49,18 +50,13 @@ In this analysis the following variables were used:
   
   2. Year_of_Release: Variable of type "char" that identifies the year of the launch and of the game.
   
-  
-  3. Genre: Variable of type "char" that identifies the game genre. For example: Sports, Racing, Platform, etc.
-
-  4. NA_Sales: Variable of type "double" that identifies the number of the sales in North America in millions of units.
+  3. NA_Sales: Variable of type "double" that identifies the number of the sales in North America in millions of units.
     
-  5. EU_Sales: Variable of type "double" that identifies the number of the sales in European Union in millions of units.
-      
-  6. JP_Sales: Variable of type "double" that identifies the number of the sales in Japan in millions of units.
+  4. EU_Sales: Variable of type "double" that identifies the number of the sales in European Union in millions of units.
   
-  7. Global_Sales: Variable of type "double" that identifies the number of the sales in the whole World in millions of units.
+  5. Global_Sales: Variable of type "double" that identifies the number of the sales in the whole World in millions of units.
   
-  8. Critic_Score: variable of type "int" that identifies the aggregate score compiled by Metacritic staff.
+  6. Critic_Score: variable of type "int" that identifies the aggregate score compiled by Metacritic staff.
   
 # There is linear correlation between critic score and number of global sales? If yes, are the games with the highest critic score the most sold?
 
@@ -74,12 +70,12 @@ filtered <- df %>% select(Critic_Score, Global_Sales, Year_of_Release) %>% filte
 hist(filtered$Critic_Score)
 qqnorm(filtered$Critic_Score)
 qqline(filtered$Critic_Score, col = 2)
-ks.test(filtered$Critic_Score, "pnorm")
+ad.test(filtered$Critic_Score)
 ```
 
 Analyzing the histogram the variable seems to be a normal distribution, but when we check the Q-Q Plot with support of the QQ Line that sets a drawn line in the first and third quartiles gives to us a robust approach for estimating the parameters of the normal distribution. So, departures from the line (except in the tails) are indicative of a lack of normality as we can see in the plot.
 
-To confirm we run a Kolmogorov-Smirnov test to check if is a normal distribution and then we get as a result a p-value < 0.01 indicatting that is not a normal distribution.
+To confirm we run a Anderson-Darling test to check if is a normal distribution and then we get as a result a p-value < 0.01 indicatting that is not a normal distribution.
 
 Checking our second variable, Global Sales, we get:
 
@@ -95,8 +91,8 @@ we clearly see that distribuition is not normal.
 Then we have to use a different method to analyze the correlation between sales and critic scores. Kendall method is indicated in this case, which are a rank-based correlation coefficient (non-parametric).
 
 ```{r}
-spearmanTest <-cor.test(filtered$Critic_Score, filtered$Global_Sales,  method = "kendall")
-spearmanTest
+kendallTest <-cor.test(filtered$Critic_Score, filtered$Global_Sales,  method = "kendall")
+kendallTest
 ```
 
 It estimated that the linear correlation between the Critic_Score and Global_Sales is 0.2749, accordingly the Kendall's test. This correlation is positive and significative (p < 0.01) indicating that sales grow linearly as the critic score. 
@@ -109,10 +105,58 @@ Now we want to analyze if the sales are equally distributed in the following reg
 
 The main market of the games lays on these regions, it is where the most games are created and distributed. 
 
-Then to check whether the sales are equally distributed in these regions we applied an anova one-way test. We get the following results:
+Below we plotted the percentage of the sales by year, to analyze which region sold more.
+
 ```{r}
-p4 <- ggplot() + geom_bar(aes(y = Global_Sales, x = Year_of_Release, fill =  ), data = charts.data,
-                           stat="identity")
+a <- df %>% group_by(Year_of_Release) %>% summarize(glboal = sum(Global_Sales),na = sum(NA_Sales), eu= sum(EU_Sales))
+
+northAmerica <- data.frame(Year = as.numeric(a$Year_of_Release),'Region' = 'North America', 'Region Sales' = (100 * a$na)/a$glboal) 
+
+europe <- data.frame(Year = as.numeric(a$Year_of_Release), 'Region' = 'Europe', 'Region Sales' = (100 * a$eu)/a$glboal) 
+
+
+all <- rbind(northAmerica, europe)
+
+all <- all %>% filter (Year < 2015)
+
+p4 <- ggplot() + geom_bar(aes(y = Region.Sales, x = Year, fill = Region), data = all, stat="identity") + theme(legend.position="top", legend.direction="horizontal") + scale_fill_discrete("") + ylab("Global Sales (%)")
 p4
+
 ```
 
+In the plot we can see that North America dominated the scenario for most part of the time. In the first years of the video game era Europe had significance in the market, most of the sales were made in NA. However, in last 20 years Europe sales are growing considerably and in the last 5 years are getting close of North American Sales. We can see in the plot that the sales are not equally distributed.
+
+So to validate our answer we will test the normality of the data using Anderson-Darling in order to use the T-test for the our two independent samples, NA_Sales and EU_Sales:
+
+```{r}
+ad.test(df$NA_Sales)
+ad.test(df$EU_Sales)
+```
+
+With the result of both tests we reject the null hypothesis because the p-value is not significative (p < 0.01), therefore the samples did not present normality.
+
+Then, we will use the non-parametric test U of Wilcoxon to two independent medians, analogue to parametric T-test to two independent samples.
+
+```{r}
+summary (df$NA_Sales)
+summary (df$EU_Sales)
+```
+
+The research question that we must do is: "The median of North America sales (median = 0.08), observed in first sample, it is significantly bigger than the median of European Sales (median = 0.02), observed in the second sample?"
+
+```{r}
+wilcox.test(df$NA_Sales, df$EU_Sales)
+```
+
+With this result we can estimate that the median of the sales is 0.08 millions to North America and 0.02 millions to Europe. This values are significantly differents (p < 0.01), therefore the sales of games in North America should be greater than in Europe.
+
+The data is summarized in the following table:
+```{r}
+resume <- matrix(c("0.08 (0;0.24)","0.02(0;0.11)", "2.2e-16"), ncol=3,byrow=TRUE)
+colnames(resume) <- c("North America", "Europe", "p-value")
+rownames(resume) <- c("Sales in Millions")
+resume <- as.table(resume)
+resume
+```
+
+This data are presented by medians (quartil 25% - quartil 75%)
